@@ -1,4 +1,4 @@
-module git.code.oa.com/cpuload
+module git.code.oa.com/keyixie/cpuload
 
 go 1.16
 
