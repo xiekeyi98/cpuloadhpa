@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 
-	"github.com/xiekeyi98/cpuload"
+	"github.com/xiekeyi98/cpuloadhpa"
 )
 
 func main() {
-	l := cpuload.NewPayloadPercent(context.Background(), 50)
+	l := cpuloadhpa.NewPayloadPercent(context.Background(), 50)
 	l.Run()
 	select {}
 }

@@ -1,4 +1,4 @@
-package cpuload
+package cpuloadhpa
 
 import (
 	"context"
@@ -46,7 +46,7 @@ func (c *cl) monitorSleepTime() {
 	}
 }
 
-func (c *cl) Run() {
+func (c *cl) AsyncRun() {
 	go c.monitorSleepTime()
 
 	for i := 0; i < runtime.NumCPU()/2; i++ {

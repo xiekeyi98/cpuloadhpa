@@ -1,4 +1,4 @@
-package cpuload
+package cpuloadhpa
 
 import (
 	"context"
