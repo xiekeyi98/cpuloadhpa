@@ -8,10 +8,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/xiekeyi98/cpuloadhpa"
+	_ "go.uber.org/automaxprocs"
 )
 
 func main() {
-	cl := cpuloadhpa.NewPayloadPercent(context.Background(), 75, cpuloadhpa.WithGoroutineNums(runtime.NumCPU()))
+	cl := cpuloadhpa.NewPayloadPercent(context.Background(), 75, cpuloadhpa.WithGoroutineNums(runtime.GOMAXPROCS(0)))
 	cl.AsyncRun()
 	tic := time.NewTicker(time.Minute * 5)
 	defer tic.Stop()
