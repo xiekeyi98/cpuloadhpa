@@ -24,22 +24,24 @@ func NewPayloadPercent(ctx context.Context, percent int) *cl {
 }
 
 func (c *cl) monitorSleepTime() {
-	tik := time.Tick(time.Second * 1)
-	for range tik {
+	l, r := time.Nanosecond, time.Second*10
+	for {
 		select {
 		case <-c.ctx.Done():
 			return
 		default:
-			logrus.Infof("sleep time : %v", c.sleepTime)
-			cpus, err := cpu.Percent(time.Second*3, false)
+			cpus, err := cpu.Percent(time.Millisecond*1215, false)
 			if err != nil {
 				logrus.Errorf("Err:%v", err)
 			}
 			percent := cpus[0]
+			mid := (l + r) / 2
+			c.sleepTime = mid
+			logrus.Infof("sleep time : %v", c.sleepTime)
 			if percent > float64(c.targetPercent) {
-				c.sleepTime = c.sleepTime * 2
-			} else if percent < float64(c.targetPercent) {
-				c.sleepTime = c.sleepTime / 2
+				l = mid
+			} else if percent <= float64(c.targetPercent) {
+				r = mid
 			}
 		}
 
@@ -49,7 +51,9 @@ func (c *cl) monitorSleepTime() {
 func (c *cl) AsyncRun() {
 	go c.monitorSleepTime()
 
-	for i := 0; i < runtime.NumCPU()/2; i++ {
+	goroutines := runtime.GOMAXPROCS(0) / 2
+	logrus.Infof("goroutines set : %v", goroutines)
+	for i := 0; i < goroutines; i++ {
 		go func() {
 			for {
 				select {

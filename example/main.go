@@ -8,6 +8,6 @@ import (
 
 func main() {
 	l := cpuloadhpa.NewPayloadPercent(context.Background(), 50)
-	l.Run()
+	l.AsyncRun()
 	select {}
 }
