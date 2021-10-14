@@ -13,16 +13,36 @@ type cl struct {
 	sleepTime     time.Duration
 	targetPercent int
 	ctx           context.Context
+	goroutineNums int
 }
+type Options func(*cl)
 
-func NewPayloadPercent(ctx context.Context, percent int) *cl {
-	return &cl{
+func WithGoroutineNums(num int) Options {
+	return func(c *cl) {
+		c.goroutineNums = num
+	}
+}
+func NewPayloadPercent(ctx context.Context, percent int, options ...Options) *cl {
+	res := &cl{
 		sleepTime:     time.Millisecond,
 		targetPercent: percent,
 		ctx:           ctx,
+		goroutineNums: runtime.GOMAXPROCS(0) / 2,
 	}
+	for _, o := range options {
+		o(res)
+	}
+	logrus.Infof("set goroutineNums:%v ,and target cpu: %v", res.goroutineNums, res.targetPercent)
+	return res
 }
 
+func (c *cl) UpdateTarget(target int) {
+	logrus.Infof("update target cpu: %v", c.targetPercent)
+	c.targetPercent = target
+}
+func (c *cl) GetTarget() int {
+	return c.targetPercent
+}
 func (c *cl) monitorSleepTime() {
 	l, r := time.Nanosecond, time.Second*10
 	for {
@@ -37,7 +57,7 @@ func (c *cl) monitorSleepTime() {
 			percent := cpus[0]
 			mid := (l + r) / 2
 			c.sleepTime = mid
-			logrus.Infof("sleep time : %v", c.sleepTime)
+			//logrus.Infof("sleep time : %v", c.sleepTime)
 			if percent > float64(c.targetPercent) {
 				l = mid
 			} else if percent <= float64(c.targetPercent) {
@@ -51,9 +71,7 @@ func (c *cl) monitorSleepTime() {
 func (c *cl) AsyncRun() {
 	go c.monitorSleepTime()
 
-	goroutines := runtime.GOMAXPROCS(0) / 2
-	logrus.Infof("goroutines set : %v", goroutines)
-	for i := 0; i < goroutines; i++ {
+	for i := 0; i < c.goroutineNums; i++ {
 		go func() {
 			for {
 				select {
