@@ -24,14 +24,14 @@ func NewPayloadPercent(ctx context.Context, percent int) *cl {
 }
 
 func (c *cl) monitorSleepTime() {
-	tik := time.Tick(time.Second)
+	tik := time.Tick(time.Second * 1)
 	for range tik {
 		select {
 		case <-c.ctx.Done():
 			return
 		default:
 			logrus.Infof("sleep time : %v", c.sleepTime)
-			cpus, err := cpu.Percent(time.Second, false)
+			cpus, err := cpu.Percent(time.Second*3, false)
 			if err != nil {
 				logrus.Errorf("Err:%v", err)
 			}
